@@ -5,6 +5,13 @@
   padding: 0;
 }
 
+:root {
+  --loreal-red: #ff003b;
+  --loreal-gold: #e3a535;
+  --loreal-foreground: #000000;
+  --loreal-on-red: #ffffff;
+}
+
 /* —— body + fonts —— */
 body {
   font-family: "Montserrat", Arial, Helvetica, sans-serif;
@@ -36,6 +43,10 @@ body {
   margin-bottom: 10px;
 }
 
+.site-title {
+  color: var(--loreal-red);
+}
+
 /* category filter */
 .search-section {
   margin: 30px 0;
@@ -46,7 +57,7 @@ body {
   width: 100%;
   padding: 16px;
   font-size: 18px;
-  border: 2px solid #000;
+  border: 2px solid var(--loreal-gold);
   border-radius: 8px;
   cursor: pointer;
   background-color: white;
@@ -55,13 +66,14 @@ body {
 
 .search-section select:focus {
   outline: none;
-  border-color: #666;
+  border-color: var(--loreal-red);
+  box-shadow: 0 0 0 6px rgba(255, 0, 59, 0.06);
 }
 
 /* chat section */
 .chatbox {
   margin: 40px 0;
-  border: 2px solid #000;
+  border: 2px solid var(--loreal-gold);
   border-radius: 8px;
   padding: 26px;
 }
@@ -108,13 +120,13 @@ body {
 
 .chat-form input:focus {
   outline: none;
-  border-bottom-color: #000;
+  border-bottom-color: var(--loreal-red);
 }
 
 .chat-form button {
   font-size: 18px;
-  background: #000;
-  color: #fff;
+  background: var(--loreal-red);
+  color: var(--loreal-on-red);
   border: none;
   padding: 12px;
   width: 48px;
@@ -123,15 +135,16 @@ body {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background 0.3s;
+  transition: background 0.25s, color 0.25s;
 }
 
 .chat-form button:hover {
-  background: #666666;
+  background: var(--loreal-gold);
+  color: var(--loreal-foreground);
 }
 
 .chat-form button:focus {
-  outline: 2px solid #000;
+  outline: 2px solid var(--loreal-red);
   outline-offset: 2px;
 }
 
@@ -162,12 +175,12 @@ body {
 
 .site-footer a {
   margin: 0 8px;
-  color: #000;
+  color: var(--loreal-red);
   text-decoration: none;
 }
 
 .site-footer a:hover {
-  color: #666666;
+  color: var(--loreal-gold);
 }
 
 /* products grid */
@@ -180,7 +193,7 @@ body {
 
 .product-card {
   flex: 0 1 calc(33.333% - 14px);
-  border: 1px solid #ccc;
+  border: 1px solid rgba(227, 165, 53, 0.12);
   padding: 15px;
   border-radius: 4px;
   display: flex;
@@ -217,7 +230,7 @@ body {
 .selected-products {
   margin: 40px 0;
   padding: 20px;
-  border: 2px solid #000;
+  border: 2px solid var(--loreal-gold);
   border-radius: 8px;
 }
 
@@ -238,8 +251,8 @@ body {
   padding: 16px;
   font-size: 18px;
   font-weight: 500;
-  color: #fff;
-  background: #000;
+  color: var(--loreal-on-red);
+  background: var(--loreal-red);
   border: none;
   border-radius: 8px;
   cursor: pointer;
@@ -247,7 +260,8 @@ body {
 }
 
 .generate-btn:hover {
-  background: #666;
+  background: var(--loreal-gold);
+  color: var(--loreal-foreground);
 }
 
 .generate-btn i {
