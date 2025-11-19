@@ -4,6 +4,75 @@ const productsContainer = document.getElementById("productsContainer");
 const chatForm = document.getElementById("chatForm");
 const chatWindow = document.getElementById("chatWindow");
 const selectedProductsList = document.getElementById("selectedProductsList");
+// Panel elements
+const productPanel = document.getElementById("productPanel");
+const panelImage = document.getElementById("panelImage");
+const panelTitle = document.getElementById("panelTitle");
+const panelBrand = document.getElementById("panelBrand");
+const panelDescription = document.getElementById("panelDescription");
+const panelSelectBtn = document.getElementById("panelSelectBtn");
+const closePanelBtn = document.getElementById("closePanel");
+
+let panelOpenForId = null;
+let lastFocusedElement = null;
+
+function openPanelFor(product) {
+  if (!product) return;
+  panelOpenForId = Number(product.id);
+  lastFocusedElement = document.activeElement;
+
+  panelImage.src = product.image || "";
+  panelImage.alt = product.name || "";
+  panelTitle.textContent = product.name || "";
+  panelBrand.textContent = product.brand || "";
+  panelDescription.textContent = product.description || "";
+
+  // Update select button text based on current selection
+  const isSelected = selectedProducts.some((p) => p.id === panelOpenForId);
+  panelSelectBtn.textContent = isSelected
+    ? "Remove from Selected"
+    : "Add to Selected";
+
+  productPanel.setAttribute("aria-hidden", "false");
+
+  // focus management
+  closePanelBtn.focus();
+
+  // key listener for Escape
+  document.addEventListener("keydown", panelKeyHandler);
+}
+
+function closePanel() {
+  productPanel.setAttribute("aria-hidden", "true");
+  panelOpenForId = null;
+  document.removeEventListener("keydown", panelKeyHandler);
+  if (lastFocusedElement && typeof lastFocusedElement.focus === "function") {
+    lastFocusedElement.focus();
+  }
+}
+
+function panelKeyHandler(e) {
+  if (e.key === "Escape") closePanel();
+}
+
+// Click on backdrop should close
+productPanel.addEventListener("click", (e) => {
+  const closeAttr =
+    e.target.getAttribute && e.target.getAttribute("data-close");
+  if (closeAttr) closePanel();
+});
+
+closePanelBtn.addEventListener("click", closePanel);
+
+panelSelectBtn.addEventListener("click", () => {
+  if (!panelOpenForId) return;
+  toggleSelect(panelOpenForId);
+  // update button text
+  const nowSelected = selectedProducts.some((p) => p.id === panelOpenForId);
+  panelSelectBtn.textContent = nowSelected
+    ? "Remove from Selected"
+    : "Add to Selected";
+});
 
 /* Show initial placeholder until user selects a category */
 productsContainer.innerHTML = `
@@ -36,6 +105,7 @@ function displayProducts(products) {
     .map(
       (product) => `
     <div class="product-card" data-id="${product.id}" role="button" tabindex="0" aria-pressed="false">
+      <button class="details-btn" aria-label="View details of ${product.name}"><i class="fa-solid fa-info-circle"></i></button>
       <img src="${product.image}" alt="${product.name}">
       <div class="product-info">
         <h3>${product.name}</h3>
@@ -61,6 +131,16 @@ function displayProducts(products) {
 
     // Click to toggle selection
     card.addEventListener("click", () => toggleSelect(id));
+
+    // Add details button handler if present
+    const detailsBtn = card.querySelector(".details-btn");
+    if (detailsBtn) {
+      detailsBtn.addEventListener("click", (ev) => {
+        ev.stopPropagation();
+        const prod = getProductById(id);
+        openPanelFor(prod);
+      });
+    }
 
     // Keyboard accessibility: Enter or Space toggles selection
     card.addEventListener("keydown", (e) => {

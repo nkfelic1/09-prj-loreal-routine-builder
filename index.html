@@ -86,6 +86,40 @@
     </div>
 
     <!-- secrets.js can be removed when using Cloudflare Workers for API requests -->
+    <!-- Product detail panel (populated by JS) -->
+    <div
+      id="productPanel"
+      class="product-panel"
+      role="dialog"
+      aria-modal="true"
+      aria-hidden="true"
+      aria-labelledby="panelTitle"
+    >
+      <div class="product-panel__backdrop" data-close="true"></div>
+      <div class="product-panel__content" role="document">
+        <button
+          id="closePanel"
+          class="panel-close"
+          aria-label="Close product details"
+        >
+          &times;
+        </button>
+        <div class="product-panel__body">
+          <img id="panelImage" class="panel-image" src="" alt="" />
+          <div class="product-panel__info">
+            <h2 id="panelTitle" class="panel-title"></h2>
+            <p id="panelBrand" class="panel-brand"></p>
+            <p id="panelDescription" class="panel-description"></p>
+            <div class="panel-actions">
+              <button id="panelSelectBtn" class="generate-btn">
+                Add to Selected
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <script src="secrets.js"></script>
     <script src="script.js"></script>
   </body>
