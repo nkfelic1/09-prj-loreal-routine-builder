@@ -306,6 +306,47 @@ function toggleSelect(id) {
 
   // refresh selected products UI
   renderSelectedProducts();
+  // persist selection
+  saveSelectedToStorage();
+}
+
+function saveSelectedToStorage() {
+  try {
+    const ids = selectedProducts.map((p) => p.id);
+    localStorage.setItem("selectedProducts", JSON.stringify(ids));
+  } catch (err) {
+    console.warn("Could not save selected products to localStorage", err);
+  }
+}
+
+async function restoreSelectedFromStorage() {
+  try {
+    const raw = localStorage.getItem("selectedProducts");
+    const ids = raw ? JSON.parse(raw) : [];
+    if (!ids || !ids.length) {
+      renderSelectedProducts();
+      return;
+    }
+    // ensure products are loaded so getProductById works
+    await loadProducts();
+    selectedProducts = ids
+      .map((id) => getProductById(id))
+      .filter((p) => p !== null && p !== undefined);
+    renderSelectedProducts();
+    updateCardSelections();
+  } catch (err) {
+    console.warn("Could not restore selected products from localStorage", err);
+    renderSelectedProducts();
+  }
+}
+
+function updateCardSelections() {
+  productsContainer.querySelectorAll(".product-card").forEach((card) => {
+    const id = Number(card.dataset.id);
+    const isSelected = selectedProducts.some((p) => Number(p.id) === id);
+    card.classList.toggle("selected", isSelected);
+    card.setAttribute("aria-pressed", isSelected ? "true" : "false");
+  });
 }
 
 function renderSelectedProducts() {
@@ -527,8 +568,10 @@ chatForm.addEventListener("submit", async (e) => {
   }
 });
 
-// Initialize selected area placeholder
-renderSelectedProducts();
+// Initialize selected area placeholder (restore persisted selections)
+(async function initSelections() {
+  await restoreSelectedFromStorage();
+})();
 
 /* Generate Routine button: send selected products JSON to the API and show the result */
 const generateBtn = document.getElementById("generateRoutine");
