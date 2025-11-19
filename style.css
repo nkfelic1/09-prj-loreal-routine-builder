@@ -281,6 +281,45 @@ body {
   gap: 10px;
 }
 
+/* Actions row for selected-products: Clear + Generate */
+.selected-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+/* Secondary (clear) button — subtle, branded */
+.secondary-btn {
+  background: transparent;
+  border: 2px solid var(--loreal-gold);
+  color: var(--loreal-red);
+  padding: 12px 14px;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 180ms ease, color 180ms ease, transform 120ms ease;
+}
+
+.secondary-btn:hover {
+  background: var(--loreal-gold);
+  color: var(--loreal-foreground);
+}
+
+.secondary-btn:focus {
+  outline: 3px solid rgba(227, 165, 53, 0.18);
+  outline-offset: 2px;
+}
+
+/* When placed next to the generate button, allow generate to flex */
+.selected-actions .generate-btn {
+  flex: 1 1 auto;
+  width: auto; /* override the default full-width */
+  margin-top: 0; /* keep spacing consistent */
+}
+
 .selected-chip {
   display: inline-flex;
   align-items: center;

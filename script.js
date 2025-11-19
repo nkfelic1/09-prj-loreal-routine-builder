@@ -5,6 +5,7 @@ const chatForm = document.getElementById("chatForm");
 const chatWindow = document.getElementById("chatWindow");
 const selectedProductsList = document.getElementById("selectedProductsList");
 const userInput = document.getElementById("userInput");
+const clearSelectionsBtn = document.getElementById("clearSelectionsBtn");
 // Panel elements
 const productPanel = document.getElementById("productPanel");
 const panelImage = document.getElementById("panelImage");
@@ -617,3 +618,21 @@ Products JSON:\n${productsJson}`;
       '<i class="fa-solid fa-wand-magic-sparkles"></i> Generate Routine';
   }
 });
+
+// Clear all selections handler
+function clearAllSelections() {
+  if (!selectedProducts || !selectedProducts.length) return;
+  selectedProducts = [];
+  saveSelectedToStorage();
+  renderSelectedProducts();
+  updateCardSelections();
+  // close panel if open
+  if (panelOpenForId) closePanel();
+}
+
+if (clearSelectionsBtn) {
+  clearSelectionsBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    clearAllSelections();
+  });
+}
