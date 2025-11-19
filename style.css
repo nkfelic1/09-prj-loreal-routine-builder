@@ -49,6 +49,17 @@ body {
   color: var(--loreal-red);
 }
 
+/* Header direction toggle wrapper */
+.dir-toggle-wrapper {
+  margin-top: 8px;
+}
+
+#dirToggleBtn {
+  padding: 8px 12px;
+  font-size: 14px;
+  border-radius: 8px;
+}
+
 /* category filter */
 .search-section {
   margin: 30px 0;
@@ -64,6 +75,23 @@ body {
   cursor: pointer;
   background-color: white;
   font-weight: 500;
+}
+
+/* product search input */
+#productSearch {
+  padding: 14px 16px;
+  font-size: 16px;
+  border: 2px solid rgba(227, 165, 53, 0.18);
+  border-radius: 8px 0 0 8px;
+  min-width: 220px;
+  flex: 0 0 320px;
+  margin-right: 12px;
+}
+
+#productSearch:focus {
+  outline: none;
+  border-color: var(--loreal-red);
+  box-shadow: 0 0 0 6px rgba(255, 0, 59, 0.04);
 }
 
 .search-section select:focus {
@@ -553,6 +581,94 @@ body {
 
 .msg.ai .msg-ts {
   margin-left: 8px;
+}
+
+/* ---------- RTL Support ---------- */
+[dir="rtl"] .search-section {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] #productSearch {
+  border-radius: 0 8px 8px 0; /* flip rounded corners */
+  margin-right: 0;
+  margin-left: 12px;
+}
+
+[dir="rtl"] .search-section select {
+  border-radius: 8px 0 0 8px;
+}
+
+[dir="rtl"] .product-card {
+  flex-direction: row-reverse; /* image on the right */
+}
+
+[dir="rtl"] .details-btn {
+  right: auto;
+  left: 8px; /* move details button to left side */
+}
+
+[dir="rtl"] .selected-products {
+  direction: rtl;
+}
+
+[dir="rtl"] #selectedProductsList {
+  direction: rtl;
+}
+
+[dir="rtl"] .selected-actions {
+  flex-direction: row-reverse;
+}
+
+/* Product panel: slide in from left in RTL and flip content order */
+[dir="rtl"] .product-panel__content {
+  margin-left: 0;
+  margin-right: auto;
+}
+
+[dir="rtl"] .product-panel__body {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .panel-close {
+  left: auto;
+  right: 12px;
+}
+
+/* Chat bubbles: swap alignment and avatar positions */
+[dir="rtl"] .msg.ai {
+  justify-content: flex-end;
+}
+
+[dir="rtl"] .msg.ai .msg-content {
+  /* mirror rounded corners */
+  border-top-right-radius: 6px;
+  border-top-left-radius: 12px;
+  border-bottom-left-radius: 12px;
+}
+
+[dir="rtl"] .msg.user {
+  justify-content: flex-start;
+}
+
+[dir="rtl"] .msg.user .msg-content {
+  border-top-right-radius: 12px;
+  border-top-left-radius: 6px;
+  border-bottom-right-radius: 12px;
+}
+
+[dir="rtl"] .msg.user .msg-avatar {
+  margin-right: 0;
+  margin-left: 10px;
+}
+
+[dir="rtl"] .msg.ai .msg-ts {
+  margin-left: 0;
+  margin-right: 8px;
+}
+
+[dir="rtl"] .msg.user .msg-ts {
+  margin-left: 0;
+  margin-right: 10px;
 }
 
 @media (max-width: 600px) {

@@ -6,6 +6,7 @@ const chatWindow = document.getElementById("chatWindow");
 const selectedProductsList = document.getElementById("selectedProductsList");
 const userInput = document.getElementById("userInput");
 const clearSelectionsBtn = document.getElementById("clearSelectionsBtn");
+const productSearch = document.getElementById("productSearch");
 // Panel elements
 const productPanel = document.getElementById("productPanel");
 const panelImage = document.getElementById("panelImage");
@@ -119,19 +120,50 @@ function renderContent(raw) {
   return withMd;
 }
 
-/* Filter and display products when category changes */
-categoryFilter.addEventListener("change", async (e) => {
+/* Debounce helper to limit how often filtering runs while typing */
+function debounce(fn, wait = 180) {
+  let t;
+  return (...args) => {
+    clearTimeout(t);
+    t = setTimeout(() => fn.apply(null, args), wait);
+  };
+}
+
+/* Apply both category and search filters and render the grid */
+async function applyFilters() {
   const products = await loadProducts();
-  const selectedCategory = e.target.value;
+  const selectedCategory = categoryFilter.value || "";
+  const query =
+    (productSearch && productSearch.value.trim().toLowerCase()) || "";
 
-  /* filter() creates a new array containing only products 
-     where the category matches what the user selected */
-  const filteredProducts = products.filter(
-    (product) => product.category === selectedCategory
-  );
+  let filtered = products;
+  if (selectedCategory) {
+    filtered = filtered.filter(
+      (product) => product.category === selectedCategory
+    );
+  }
 
-  displayProducts(filteredProducts);
-});
+  if (query) {
+    filtered = filtered.filter((p) => {
+      const hay = (
+        (p.name || "") +
+        " " +
+        (p.brand || "") +
+        " " +
+        (p.description || "")
+      ).toLowerCase();
+      return hay.indexOf(query) !== -1;
+    });
+  }
+
+  displayProducts(filtered);
+}
+
+// Wire events: category change and search input (debounced)
+categoryFilter.addEventListener("change", applyFilters);
+if (productSearch) {
+  productSearch.addEventListener("input", debounce(applyFilters, 180));
+}
 
 // Helper to append messages to the chat window
 function appendMessage(role, text) {
@@ -434,46 +466,80 @@ function displayProducts(products) {
 
 const chatHistory = [
   {
-    role: "system",
-    content: `You are a virtual beauty specialist dedicated to assisting users with questions about beauty products, routines, and recommendations. Prioritize L'Oréal products when appropriate, but you are also allowed to discuss and generate routines using the specific product catalog available on this site. The site catalog includes brands such as: CeraVe, La Roche-Posay, Vichy, L'Oréal Paris, Maybelline, Lancôme, Garnier, Kiehl's, Kérastase, SkinCeuticals, Urban Decay, Yves Saint Laurent, Redken (and other items listed on the site). Maintain a positive, encouraging attitude, and suggest specific products from the allowed list when helpful. Keep responses concise—short to medium length (2-5 sentences) unless the user asks for more detail.
+    role: "developer",
+    content: `You are a virtual beauty specialist who performs web searches in real time to provide current, accurate information about beauty products, routines, and recommendations, with a focus on L'Oréal and the site catalog. Your primary function is to assist users with questions about L'Oréal products, related routines, and brands sold on this site (including: CeraVe, La Roche-Posay, Vichy, L'Oréal Paris, Maybelline, Lancôme, Garnier, Kiehl's, Kérastase, SkinCeuticals, Urban Decay, Yves Saint Laurent, Redken, and others in the catalog). Your responses should always reflect the most recent information, referencing official sources, reputable sites, or the current product catalog, and must include links or citations for any web-derived info or recommendations.
 
-  -- **Acceptable Topics**: Questions about L'Oréal products and the site's product catalog (the brands listed above), product comparisons among those items, beauty routines using those products, skin/hair concerns addressed by those lines, and guidance for choosing items from the site's catalog.
-  -- **Unacceptable Topics**: Non-beauty-related questions, medical or legal advice, or requests outside the scope of beauty/routine/product guidance.
+Before producing your answer:
+- **Step 1: Scope check:** Determine if the user question relates to beauty advice, products, routines, beauty concerns, or comparisons for items from the allowed catalog.
+- **Step 2: If out of scope:** Politely decline to answer and guide the conversation back to beauty/product topics.
+- **Step 3: If in scope:** Use live web search to:
+    - Retrieve up-to-date information, details, or launches about relevant products (especially L'Oréal; include others as the user directs).
+    - Suggest routines, recommendations, or comparisons using ONLY products in the allowed site catalog.
+    - Reference and link to your sources/citations for any factual/product information provided, using inline links.
+    - Prefer L'Oréal products when possible, but include other brands upon request or if more appropriate.
+- **Step 4: Tone and detail:** Use a friendly, concise, and professional voice. Keep responses short to medium length (2–5 sentences); use short numbered lists for routines/steps if asked. Expand with step-by-step instructions only when the user requests more detail.
+- **Step 5: Output format:** Use a single concise paragraph for general responses; use short numbered or bullet lists for routines. Ensure that every answer based on live web information includes proper citation(s)/link(s).
 
-  Before answering, always:
-  1. Determine whether the question is about beauty/routines/products from the allowed catalog.
-  2. If it's out of scope for beauty, politely decline and steer back to beauty topics.
-  3. If in scope, provide a helpful answer that references items from the allowed catalog (prioritize L'Oréal products when appropriate, but include other listed brands as requested).
-  4. Keep most responses concise (2-5 sentences); expand only when the user asks for detailed routines or step-by-step instructions.
+**Acceptable Topics:**
+- Questions about L'Oréal or other allowed products, product comparisons, beauty routines (skin, hair, makeup), beauty concerns (e.g., dryness, aging, sensitivity), guidance for product selection from the site catalog.
 
-  **Output format**: Prefer a single concise paragraph for short answers; for generated routines, a short numbered list or step-by-step format is acceptable.
+**Unacceptable Topics:**
+- Non-beauty questions, medical or legal advice, or topics beyond beauty products/practices and the brands listed.
 
-  ---
-
-  Examples and tone: keep a friendly, professional voice. When asked to generate routines, use the products the user selected (from the allowed catalog) and produce a practical, step-by-step routine referencing product names explicitly.
-
----
-
-## Examples
-
-**Example 1**
-- **User input**: Which L'Oreal shampoo works best for dry hair?
-- **Output**: For dry hair, I'd recommend the L'Oreal Paris Elvive Extraordinary Oil Shampoo—it deeply nourishes and hydrates, leaving your hair soft and beautifully shiny. It's perfect if you're looking for a boost of moisture!
-
-**Example 2**
-- **User input**: Can you tell me who won the World Cup in 2010?
-- **Output**: I'm here to help with all your beauty needs, especially anything related to L'Oreal products or routines. If you have a beauty-related question or want to know about L'Oreal's best products, please let me know—I’d love to help you find your perfect match!
-
-**Example 3**
-- **User input**: What is a good L'Oreal face serum for anti-aging?
-- **Output**: For anti-aging benefits, I strongly recommend the L'Oreal Paris Revitalift 1.5% Pure Hyaluronic Acid Serum. It visibly plumps and smooths your skin for a youthful, radiant look!
-
-*(For full-length conversations, always keep responses to 2-5 sentences; expand details only where specific product recommendations are required.)*
+**Important:**  
+Always perform real-time web search for the latest info before responding. Never recommend, reference, or cite products/brands not explicitly included in the allowed catalog.
 
 ---
 
-**Important reminders**:  
-Only answer beauty- or L'Oreal-related questions; always suggest a specific L'Oreal product or routine when possible; politely steer non-beauty questions back to topic; keep tone positive and concise.`,
+### Output Formatting
+
+- **For short/general answers:** Single concise paragraph, 2–5 sentences, with inline link(s) or [citation(s)] referencing up-to-date sources where appropriate.
+- **For routines/instructions:** Short numbered/bulleted list (up to 6 steps) using explicit product names and specific citation(s) after each recommended product if sourced online.
+- **Declined/out-of-scope queries:** Brief, polite sentence redirecting to beauty topics.
+- **Response length:** 2–5 sentences unless user requests detailed steps.
+
+---
+
+### Examples
+
+**Example 1**  
+**User input:** Which L'Oréal shampoo works best for dry hair?
+**Output:** For dry hair, I'd recommend the [L'Oréal Paris Elvive Extraordinary Oil Shampoo](https://www.lorealparis.com/extrordinary-oil-shampoo), which deeply nourishes and hydrates for a softer, shinier finish\[^1^]. It's a popular choice for restoring moisture balance!  
+\[^1^]: L'Oréal official product page, updated 2024
+
+**Example 2**  
+**User input:** Any new anti-aging serums from L'Oréal or La Roche-Posay?  
+**Output:** The [L'Oréal Paris Revitalift 1.5% Pure Hyaluronic Acid Serum](https://www.lorealparis.com/revitalift) and [La Roche-Posay Pure Vitamin C10 Serum](https://www.laroche-posay.us/pure-vitamin-c10-serum) are both highly rated and recently recommended for anti-aging\[^1^]\[^2^]. Each provides visible plumping and radiance benefits.  
+\[^1^]: L'Oréal Paris US, 2024; \[^2^]: La Roche-Posay US, 2024
+
+**Example 3**  
+**User input:** Can you tell me who won the World Cup in 2010?
+**Output:** I’m here to help with all your beauty needs—especially questions about L’Oréal products or routines. If you’d like advice on skincare or haircare, just let me know!
+
+**Example 4 (Routines)**  
+**User input:** Create a simple skincare routine for oily skin using La Roche-Posay products.  
+**Output:**  
+1. Cleanse with [La Roche-Posay Effaclar Purifying Foaming Gel](https://www.laroche-posay.us/effaclar-gel)\[^1^].  
+2. Tone using [Effaclar Clarifying Solution](https://www.laroche-posay.us/effaclar-solution)\[^2^].  
+3. Moisturize with [Effaclar Mat Oil-Free Mattifying Moisturizer](https://www.laroche-posay.us/effaclar-mat)\[^3^].  
+This lineup helps control oil and keep your skin clear!  
+\[^1^]: La Roche-Posay, May 2024; \[^2^]: La Roche-Posay, 2024; \[^3^]: La Roche-Posay, 2024.
+
+*(Full responses should reference up-to-date, official, or reputable information; real user examples should include current product links and relevant up-to-date info as above.)*
+
+---
+
+**Critical Reminders:**  
+- Always conduct live web search for current info.  
+- Reference, link, and cite for any product/factual statements.  
+- Prioritize L'Oréal when suitable, but use user-specified brands from the allowed catalog as requested.  
+- Polite refusal and redirection for non-beauty topics.  
+- Responses must remain concise and friendly.
+
+---
+
+**IMPORTANT INSTRUCTION REMINDER:**  
+Always use real-time web search to provide current information, cite your sources, and only suggest products from the allowed catalog. Responses should be short and friendly unless the user requests detailed steps.`,
   },
 ];
 
@@ -493,13 +559,9 @@ async function sendMessageToOpenAI(message) {
   messages.push({ role: "user", content: message });
 
   const body = {
-    model: "gpt-4o",
+    model: "gpt-5-search-api",
     messages: messages,
-    max_tokens: 500,
-    temperature: 0.7,
-    top_p: 1,
-    frequency_penalty: 0,
-    presence_penalty: 0,
+    store: false,
   };
   // Debug: log outgoing body so we can confirm the client is sending valid JSON
   console.debug("Sending worker request body:", body);
@@ -573,6 +635,49 @@ chatForm.addEventListener("submit", async (e) => {
 (async function initSelections() {
   await restoreSelectedFromStorage();
 })();
+
+/* Direction toggle: allow user to override automatic direction */
+const dirToggleBtn = document.getElementById("dirToggleBtn");
+
+function updateDirUI() {
+  if (!dirToggleBtn) return;
+  const dir = document.documentElement.getAttribute("dir") || "ltr";
+  dirToggleBtn.textContent = dir === "rtl" ? "RTL" : "LTR";
+  dirToggleBtn.setAttribute("aria-pressed", dir === "rtl" ? "true" : "false");
+}
+
+function setDirection(dir, save = true) {
+  document.documentElement.setAttribute("dir", dir);
+  updateDirUI();
+  if (save) {
+    try {
+      localStorage.setItem("dirOverride", dir);
+    } catch (err) {
+      console.warn("Could not persist dir override", err);
+    }
+  }
+}
+
+if (dirToggleBtn) {
+  dirToggleBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    const current = document.documentElement.getAttribute("dir") || "ltr";
+    const next = current === "rtl" ? "ltr" : "rtl";
+    setDirection(next, true);
+  });
+}
+
+// Apply saved override (if any) after initial auto-detection
+try {
+  const saved = localStorage.getItem("dirOverride");
+  if (saved) {
+    setDirection(saved, false);
+  } else {
+    updateDirUI();
+  }
+} catch (err) {
+  updateDirUI();
+}
 
 /* Generate Routine button: send selected products JSON to the API and show the result */
 const generateBtn = document.getElementById("generateRoutine");

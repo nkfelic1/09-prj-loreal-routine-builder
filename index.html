@@ -3,6 +3,41 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+      (function () {
+        // languages that should use RTL direction
+        const rtlLangs = new Set([
+          "ar",
+          "he",
+          "fa",
+          "ur",
+          "ps",
+          "sd",
+          "dv",
+          "ku",
+          "ks",
+          "yi",
+          "ug",
+        ]);
+
+        const raw =
+          (navigator.languages && navigator.languages[0]) ||
+          navigator.language ||
+          document.documentElement.lang ||
+          "en";
+        const lang = String(raw || "en");
+        const base = lang.split("-")[0].toLowerCase();
+
+        // set lang attribute if not already present
+        if (!document.documentElement.getAttribute("lang")) {
+          document.documentElement.setAttribute("lang", lang);
+        }
+
+        // set direction
+        const dir = rtlLangs.has(base) ? "rtl" : "ltr";
+        document.documentElement.setAttribute("dir", dir);
+      })();
+    </script>
     <title>L'Oréal | Smart Routine &amp; Product Advisor</title>
     <link
       href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;500;700&display=swap"
@@ -21,10 +56,27 @@
       <header class="site-header">
         <img src="img/loreal-logo.png" alt="L'Oréal Logo" class="logo" />
         <h1 class="site-title">Smart Routine &amp; Product Advisor</h1>
+        <div class="dir-toggle-wrapper">
+          <button
+            id="dirToggleBtn"
+            class="secondary-btn"
+            aria-pressed="false"
+            title="Toggle text direction"
+          >
+            Auto
+          </button>
+        </div>
       </header>
 
       <!-- Category Filter -->
       <div class="search-section">
+        <input
+          id="productSearch"
+          type="search"
+          placeholder="Search products by name or keyword…"
+          autocomplete="off"
+          aria-label="Search products"
+        />
         <select id="categoryFilter">
           <option value="" disabled selected>Choose a Category</option>
           <option value="cleanser">Cleansers</option>
